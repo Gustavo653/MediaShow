@@ -1,0 +1,29 @@
+Preparação MsSQLServer
+sudo docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=SenhaBraba123" -p 1433:1433 --name MsSQL -d mcr.microsoft.com/mssql/server:2022-latest
+
+Preparação MySQL
+docker run --name MySQL -e MYSQL_ROOT_PASSWORD=SenhaBraba123 -p 3306:3306 -d mysql
+
+Build imagem docker
+sudo docker build -t workflow-back .
+sudo docker run -p -d --name workflow-back 4000:3000 workflow-back
+
+Executar no docker swarm
+sudo docker swarm init
+sudo docker stack deploy -c docker-compose.yml workflow-back-stack
+
+Atualizar imagem docker swarm
+docker service update --image workflow-back:latest workflow-back-stack
+
+Listar serviços
+sudo docker stack services workflow-back-stack
+
+Parar docker swarm
+sudo docker stack rm workflow-back-stack
+
+Sair docker swarm
+sudo docker swarm leave --force
+
+
+Parte WEB
+sudo docker run -d -p 4200:80 -e API_URL=http://192.168.0.18:3000 --name workflow-front workflow-front

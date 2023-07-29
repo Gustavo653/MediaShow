@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  app:
+    image: workflow-back
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: '3.5'
+          memory: 512M
+      restart_policy:
+        condition: on-failure
+    env_file:
+      - config.env
+    ports:
+      - 3500:3000
