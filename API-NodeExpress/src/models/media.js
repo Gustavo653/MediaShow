@@ -10,6 +10,10 @@ const Media = sequelize.define("Medias", {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true
+  },
+  type: {
+    type: DataTypes.ENUM("image", "video", "web_woauth"),
+    allowNull: false
   }
 });
 

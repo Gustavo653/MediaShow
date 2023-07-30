@@ -15,8 +15,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final String _serverWS = 'ws://192.168.0.17:3000';
   String _lastMessage = '';
   bool _isConnected = false;
+  String _serialNumber = '';
   late WebSocketChannel _channel;
   String _lastSyncTime = '';
   List<Map<String, dynamic>> _mediaList = [];
@@ -33,7 +35,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _connectToWebSocket() async {
-    _channel = WebSocketChannel.connect(Uri.parse('ws://192.168.0.17:3000'));
+    _channel = WebSocketChannel.connect(Uri.parse(_serverWS));
     _channel.stream.listen(
       (message) {
         _handleReceivedMessage(message);
@@ -138,6 +140,7 @@ class _HomePageState extends State<HomePage> {
     try {
       var androidInfo = await deviceInfo.androidInfo;
       serialNumber = androidInfo.id;
+      _serialNumber = androidInfo.id;
     } catch (e) {
       print('Erro ao obter o serial number do dispositivo: $e');
       return;
@@ -178,6 +181,24 @@ class _HomePageState extends State<HomePage> {
               ),
               Text(
                 _isConnected ? "Conectado" : "Desconectado",
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const Text(
+                'IP Servidor:',
+                style: TextStyle(fontSize: 18),
+              ),
+              Text(
+                _serverWS,
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const Text(
+                'ID Dispositivo:',
+                style: TextStyle(fontSize: 18),
+              ),
+              Text(
+                _serialNumber,
                 style:
                     const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),

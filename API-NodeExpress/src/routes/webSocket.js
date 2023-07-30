@@ -58,10 +58,16 @@ function createWebSocketServer(server) {
       include: [{ model: Media }],
     });
 
+    if (deviceMedia.length == 0) {
+      ws.send('Dispositivo não possui mídias!');
+      return;
+    }
+
     const response = deviceMedia.map((item) => ({
       mediaName: item.Media.name,
       mediaUrl: item.Media.url.toString(),
       mediaTime: item.time,
+      mediaType:item.Media.type
     }));
 
     ws.send(JSON.stringify(response));

@@ -18,6 +18,10 @@ module.exports = {
         allowNull: false,
         unique: true
       },
+      type: {
+        type: Sequelize.ENUM("image", "video", "web_woauth"),
+        allowNull: false
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
