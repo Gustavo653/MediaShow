@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'dart:convert';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key, required this.title}) : super(key: key);
@@ -11,14 +13,17 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _counter = 0;
   String _lastMessage = '';
   bool _isConnected = false;
   late WebSocketChannel _channel;
+  String _lastSyncTime = '';
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      _sendSerialNumberAutomatically();
+    });
     _connectToWebSocket();
   }
 
@@ -29,6 +34,7 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           _isConnected = true;
           _lastMessage = message;
+          if (message == 'refresh') _sendSerialNumberAutomatically();
         });
       },
       onDone: () {
@@ -50,19 +56,37 @@ class _HomePageState extends State<HomePage> {
     );
     setState(() {
       _isConnected = true;
+      _sendSerialNumberAutomatically();
     });
+  }
+
+  Future<void> _sendSerialNumberAutomatically() async {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    late String serialNumber;
+
+    try {
+      var androidInfo = await deviceInfo.androidInfo;
+      print(androidInfo);
+      serialNumber = androidInfo.id;
+    } catch (e) {
+      print('Erro ao obter o serial number do dispositivo: $e');
+      return;
+    }
+
+    final jsonData = {
+      "type": "subscribe",
+      "serialNumber": serialNumber,
+    };
+
+    final jsonString = json.encode(jsonData);
+    _channel.sink.add(jsonString);
+    _lastSyncTime = DateTime.now().toString();
   }
 
   @override
   void dispose() {
     _channel.sink.close();
     super.dispose();
-  }
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
   }
 
   @override
@@ -76,31 +100,33 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
-              'Você pressionou o botão esta quantidade de vezes:',
+              'Status da conexão:',
+              style: TextStyle(fontSize: 18),
             ),
             Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.titleLarge,
+              _isConnected ? "Conectado" : "Desconectado",
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
-            Text(
-              'Status da conexão: ${_isConnected ? "Conectado" : "Desconectado"}',
-              style: Theme.of(context).textTheme.titleMedium,
+            const Text(
+              'Última resposta do servidor:',
+              style: TextStyle(fontSize: 18),
             ),
             Text(
-              'Última resposta do servidor: $_lastMessage',
-              style: Theme.of(context).textTheme.titleMedium,
+              _lastMessage,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Última sincronização:',
+              style: TextStyle(fontSize: 18),
+            ),
+            Text(
+              _lastSyncTime,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _incrementCounter();
-          _channel.sink.add('$_counter');
-        },
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }

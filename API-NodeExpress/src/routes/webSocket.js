@@ -4,6 +4,12 @@ const Media = require("../models/media");
 const Device = require("../models/device");
 const clients = [];
 
+function refreshAllClients() {
+  clients.forEach((client) => {
+    client.send('refresh');
+  });
+}
+
 function createWebSocketServer(server) {
   const wss = new WebSocket.Server({ server });
 
@@ -69,4 +75,8 @@ function createWebSocketServer(server) {
   }
 }
 
-module.exports = createWebSocketServer;
+module.exports = {
+  createWebSocketServer,
+  refreshAllClients,
+  clients,
+};

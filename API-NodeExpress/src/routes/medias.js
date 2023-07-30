@@ -1,5 +1,6 @@
 const adminMiddleware = require('../middleware/adminMiddleware');
 const authMiddleware = require('../middleware/authMiddleware');
+const {refreshAllClients} = require('../routes/webSocket');
 const Media = require("../models/media");
 const express = require("express");
 const router = express.Router();
@@ -8,7 +9,8 @@ router.post('/', authMiddleware, adminMiddleware, async (req, res, next) => {
     try {
         const { url, name } = req.body;
         const media = await Media.create({ url, name });
-        res.status(201).json(media);
+        refreshAllClients();
+        res.status(201).json(media)
     } catch (error) {
         next({
             statusCode: 500,

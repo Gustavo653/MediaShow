@@ -16,7 +16,7 @@ const multer = require('multer');
 
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-const createWebSocketServer = require("./routes/webSocket");
+const { createWebSocketServer } = require("./routes/webSocket");
 
 const app = express();
 app.use(cors());
