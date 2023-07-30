@@ -35,7 +35,6 @@ function sendToAllClients(message) {
 }
 
 function someEventOnServer() {
-  console.log(clients);
   const message = 'Esta é uma mensagem enviada do servidor para todos os clientes!';
   sendToAllClients(message);
 }
