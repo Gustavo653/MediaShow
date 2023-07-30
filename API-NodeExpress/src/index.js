@@ -5,6 +5,9 @@ const cors = require("cors");
 
 const usersRouter = require("./routes/users");
 const logsRouter = require("./routes/logs");
+const devicesRouter = require("./routes/devices");
+const mediasRouter = require("./routes/medias");
+const deviceMediasRouter = require("./routes/deviceMedias");
 const log = require("./models/log");
 const errorHandler = require("./middleware/errorHandler");
 const infoHandler = require("./middleware/infoHandler");
@@ -68,6 +71,9 @@ app.use(infoHandler);
 
 app.use("/users", usersRouter);
 app.use("/logs", logsRouter);
+app.use("/medias", mediasRouter);
+app.use("/devices", devicesRouter);
+app.use("/deviceMedias", deviceMediasRouter);
 
 app.use("*", (req, res) => {
   res.status(404).json({

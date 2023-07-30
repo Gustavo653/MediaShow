@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../database/database");
 
-const Log = sequelize.define("Log", {
+const Log = sequelize.define("Logs", {
   message: {
     type: DataTypes.BLOB,
     allowNull: false,
