@@ -21,45 +21,36 @@ class _HomePageState extends State<HomePage> {
   String _lastSyncTime = '';
   List<Map<String, dynamic>> _mediaList = [];
   int _currentIndex = 0;
-  int _currentMediaTime = 0;
   Timer? _timer;
+  bool _isShowingImageDialog = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
-      _sendSerialNumberAutomatically();
+    WidgetsBinding.instance!.addPostFrameCallback((_) async {
+      await _connectToWebSocket();
     });
-    _connectToWebSocket();
   }
 
-  void _connectToWebSocket() {
+  Future<void> _connectToWebSocket() async {
     _channel = WebSocketChannel.connect(Uri.parse('ws://192.168.0.17:3000'));
     _channel.stream.listen(
       (message) {
-        setState(() {
-          _isConnected = true;
-          _lastMessage = message;
-          if (message == 'refresh') _sendSerialNumberAutomatically();
-          _mediaList = List<Map<String, dynamic>>.from(json.decode(message));
-          _startSlideshow();
-        });
+        _handleReceivedMessage(message);
       },
-      onDone: () {
+      onDone: () async {
         setState(() {
           _isConnected = false;
         });
-        Future.delayed(const Duration(seconds: 5), () {
-          _connectToWebSocket();
-        });
+        await Future.delayed(const Duration(seconds: 5));
+        await _connectToWebSocket();
       },
-      onError: (error) {
+      onError: (error) async {
         setState(() {
           _isConnected = false;
         });
-        Future.delayed(const Duration(seconds: 5), () {
-          _connectToWebSocket();
-        });
+        await Future.delayed(const Duration(seconds: 5));
+        await _connectToWebSocket();
       },
     );
     setState(() {
@@ -68,11 +59,20 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void _handleReceivedMessage(String message) {
+    setState(() {
+      _lastMessage = message;
+      if (message == 'refresh') {
+        _sendSerialNumberAutomatically();
+      }
+      _mediaList = List<Map<String, dynamic>>.from(json.decode(message));
+      _startSlideshow();
+    });
+  }
+
   void _startSlideshow() {
     if (_mediaList.isNotEmpty) {
-      if (_timer != null) {
-        _timer!.cancel();
-      }
+      _stopSlideshow();
 
       _showImage(_currentIndex);
 
@@ -95,22 +95,36 @@ class _HomePageState extends State<HomePage> {
 
   void _showImage(int index) {
     final currentMedia = _mediaList[index];
+
+    if (_isShowingImageDialog) {
+      Navigator.of(context).pop();
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) {
+        _isShowingImageDialog = true;
+
         String mediaName = currentMedia['mediaName'] as String;
         String mediaTime = "Tempo: ${currentMedia['mediaTime']}s";
         String lastSyncText = "Últ. Sinc.: $_lastSyncTime";
         String connectionStatus = _isConnected ? "Conec." : "Descon.";
         String appBarTitle =
             "$mediaName - $lastSyncText - $connectionStatus - $mediaTime";
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(appBarTitle),
-          ),
-          body: Center(
-            child: Image.network(currentMedia['mediaUrl'] as String),
+
+        return WillPopScope(
+          onWillPop: () async {
+            _isShowingImageDialog = false;
+            return true;
+          },
+          child: Scaffold(
+            appBar: AppBar(
+              title: Text(appBarTitle),
+            ),
+            body: Center(
+              child: Image.network(currentMedia['mediaUrl'] as String),
+            ),
           ),
         );
       },
