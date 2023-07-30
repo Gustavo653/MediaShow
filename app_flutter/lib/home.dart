@@ -21,6 +21,7 @@ class _HomePageState extends State<HomePage> {
   String _lastSyncTime = '';
   List<Map<String, dynamic>> _mediaList = [];
   int _currentIndex = 0;
+  int _currentMediaTime = 0;
   Timer? _timer;
 
   @override
@@ -68,14 +69,21 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _startSlideshow() {
-    if (_mediaList.isNotEmpty && _timer == null) {
-      _currentIndex = 0;
+    if (_mediaList.isNotEmpty) {
+      if (_timer != null) {
+        _timer!.cancel();
+      }
+
       _showImage(_currentIndex);
-      _timer = Timer.periodic(
-          Duration(seconds: _mediaList[_currentIndex]['mediaTime'] as int),
-          (_) {
+
+      int currentMediaTime = _mediaList[_currentIndex]['mediaTime'] as int;
+
+      _timer = Timer.periodic(Duration(seconds: currentMediaTime), (timer) {
         _currentIndex = (_currentIndex + 1) % _mediaList.length;
+        currentMediaTime = _mediaList[_currentIndex]['mediaTime'] as int;
         _showImage(_currentIndex);
+        timer.cancel();
+        _startSlideshow();
       });
     }
   }
@@ -95,7 +103,8 @@ class _HomePageState extends State<HomePage> {
         String mediaTime = "Tempo: ${currentMedia['mediaTime']}s";
         String lastSyncText = "Últ. Sinc.: $_lastSyncTime";
         String connectionStatus = _isConnected ? "Conec." : "Descon.";
-        String appBarTitle = "$mediaName - $lastSyncText - $connectionStatus - $mediaTime";
+        String appBarTitle =
+            "$mediaName - $lastSyncText - $connectionStatus - $mediaTime";
         return Scaffold(
           appBar: AppBar(
             title: Text(appBarTitle),
@@ -114,7 +123,6 @@ class _HomePageState extends State<HomePage> {
 
     try {
       var androidInfo = await deviceInfo.androidInfo;
-      print(androidInfo);
       serialNumber = androidInfo.id;
     } catch (e) {
       print('Erro ao obter o serial number do dispositivo: $e');
@@ -133,6 +141,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
+    _timer?.cancel();
     _channel.sink.close();
     _stopSlideshow();
     super.dispose();
