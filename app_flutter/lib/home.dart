@@ -13,23 +13,44 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _counter = 0;
   String _lastMessage = '';
+  bool _isConnected = false;
   late WebSocketChannel _channel;
 
   @override
   void initState() {
     super.initState();
+    _connectToWebSocket();
+  }
+
+  void _connectToWebSocket() {
     _channel = WebSocketChannel.connect(Uri.parse('ws://192.168.0.17:3000'));
-    _channel.stream.listen((message) {
-      setState(() {
-        _lastMessage = message;
-      });
-      print('Mensagem recebida do servidor: $message');
-    }, onDone: () {
-      print('Conexão WebSocket fechada');
-    }, onError: (error) {
-      print('Erro na conexão WebSocket: $error');
+    _channel.stream.listen(
+      (message) {
+        setState(() {
+          _isConnected = true;
+          _lastMessage = message;
+        });
+      },
+      onDone: () {
+        setState(() {
+          _isConnected = false;
+        });
+        Future.delayed(const Duration(seconds: 5), () {
+          _connectToWebSocket();
+        });
+      },
+      onError: (error) {
+        setState(() {
+          _isConnected = false;
+        });
+        Future.delayed(const Duration(seconds: 5), () {
+          _connectToWebSocket();
+        });
+      },
+    );
+    setState(() {
+      _isConnected = true;
     });
-    print('Conexão WebSocket estabelecida');
   }
 
   @override
@@ -55,16 +76,20 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
-              'You have pushed the button this many times:',
+              'Você pressionou o botão esta quantidade de vezes:',
             ),
             Text(
               '$_counter',
-              style: Theme.of(context).textTheme.headline6,
+              style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 20),
             Text(
+              'Status da conexão: ${_isConnected ? "Conectado" : "Desconectado"}',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            Text(
               'Última resposta do servidor: $_lastMessage',
-              style: Theme.of(context).textTheme.subtitle1,
+              style: Theme.of(context).textTheme.titleMedium,
             ),
           ],
         ),

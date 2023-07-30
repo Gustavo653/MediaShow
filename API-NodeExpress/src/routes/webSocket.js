@@ -11,9 +11,9 @@ function createWebSocketServer(server) {
 
     ws.on('message', (message) => {
       if (message == 'teste') someEventOnServer();
-      console.log('Mensagem recebida do cliente:', JSON.stringify(message));
+      console.log('Mensagem recebida do cliente:', JSON.stringify(message.toString()));
       setTimeout(() => {
-        ws.send('Resposta do servidor: Recebi sua mensagem');
+        ws.send('Recebi sua mensagem' + JSON.stringify(message.toString()));
       }, 2000);
     });
 
