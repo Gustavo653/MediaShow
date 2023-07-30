@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:convert';
+import 'dart:async';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key, required this.title}) : super(key: key);
@@ -17,6 +19,9 @@ class _HomePageState extends State<HomePage> {
   bool _isConnected = false;
   late WebSocketChannel _channel;
   String _lastSyncTime = '';
+  List<Map<String, dynamic>> _mediaList = [];
+  int _currentIndex = 0;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -35,6 +40,8 @@ class _HomePageState extends State<HomePage> {
           _isConnected = true;
           _lastMessage = message;
           if (message == 'refresh') _sendSerialNumberAutomatically();
+          _mediaList = List<Map<String, dynamic>>.from(json.decode(message));
+          _startSlideshow();
         });
       },
       onDone: () {
@@ -60,6 +67,47 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void _startSlideshow() {
+    if (_mediaList.isNotEmpty && _timer == null) {
+      _currentIndex = 0;
+      _showImage(_currentIndex);
+      _timer = Timer.periodic(
+          Duration(seconds: _mediaList[_currentIndex]['mediaTime'] as int),
+          (_) {
+        _currentIndex = (_currentIndex + 1) % _mediaList.length;
+        _showImage(_currentIndex);
+      });
+    }
+  }
+
+  void _stopSlideshow() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
+  void _showImage(int index) {
+    final currentMedia = _mediaList[index];
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        String mediaName = currentMedia['mediaName'] as String;
+        String mediaTime = "Tempo: ${currentMedia['mediaTime']}s";
+        String lastSyncText = "Últ. Sinc.: $_lastSyncTime";
+        String connectionStatus = _isConnected ? "Conec." : "Descon.";
+        String appBarTitle = "$mediaName - $lastSyncText - $connectionStatus - $mediaTime";
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(appBarTitle),
+          ),
+          body: Center(
+            child: Image.network(currentMedia['mediaUrl'] as String),
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _sendSerialNumberAutomatically() async {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     late String serialNumber;
@@ -80,12 +128,13 @@ class _HomePageState extends State<HomePage> {
 
     final jsonString = json.encode(jsonData);
     _channel.sink.add(jsonString);
-    _lastSyncTime = DateTime.now().toString();
+    _lastSyncTime = DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.now());
   }
 
   @override
   void dispose() {
     _channel.sink.close();
+    _stopSlideshow();
     super.dispose();
   }
 

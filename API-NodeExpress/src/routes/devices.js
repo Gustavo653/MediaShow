@@ -2,12 +2,14 @@ const adminMiddleware = require('../middleware/adminMiddleware');
 const authMiddleware = require('../middleware/authMiddleware');
 const Device = require("../models/device");
 const express = require("express");
+const { refreshAllClients } = require('./webSocket');
 const router = express.Router();
 
 router.post('/', authMiddleware, adminMiddleware, async (req, res, next) => {
     try {
         const { serialNumber, name } = req.body;
         const device = await Device.create({ serialNumber, name });
+        refreshAllClients();
         res.status(201).json(device);
     } catch (error) {
         next({
@@ -42,6 +44,7 @@ router.put('/:id', authMiddleware, adminMiddleware, async (req, res, next) => {
         }
 
         await device.update({ serialNumber, name });
+        refreshAllClients();
         res.status(200).json(device);
     } catch (error) {
         next({
@@ -62,6 +65,7 @@ router.delete('/:id', authMiddleware, adminMiddleware, async (req, res, next) =>
         }
 
         await device.destroy();
+        refreshAllClients();
         res.status(200).json({ message: 'Dispositivo excluído com sucesso.' });
     } catch (error) {
         next({

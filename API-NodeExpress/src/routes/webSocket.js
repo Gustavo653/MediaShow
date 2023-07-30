@@ -5,6 +5,7 @@ const Device = require("../models/device");
 const clients = [];
 
 function refreshAllClients() {
+  console.log('Enviando refresh aos clients');
   clients.forEach((client) => {
     client.send('refresh');
   });

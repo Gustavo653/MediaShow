@@ -44,6 +44,7 @@ router.put('/:id', authMiddleware, adminMiddleware, async (req, res, next) => {
         }
 
         await media.update({ url, name });
+        refreshAllClients();
         res.status(200).json(media);
     } catch (error) {
         next({
@@ -64,6 +65,7 @@ router.delete('/:id', authMiddleware, adminMiddleware, async (req, res, next) =>
         }
 
         await media.destroy();
+        refreshAllClients();
         res.status(200).json({ message: 'Mídia excluída com sucesso.' });
     } catch (error) {
         next({

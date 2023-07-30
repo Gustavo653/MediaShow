@@ -2,13 +2,22 @@ const adminMiddleware = require('../middleware/adminMiddleware');
 const authMiddleware = require('../middleware/authMiddleware');
 const DeviceMedia = require("../models/deviceMedia");
 const express = require("express");
+const { refreshAllClients } = require('./webSocket');
 const router = express.Router();
 
 router.post('/', authMiddleware, adminMiddleware, async (req, res, next) => {
     try {
         const { deviceId, mediaId, time } = req.body;
-        const deviceMedia = await DeviceMedia.create({ deviceId, mediaId, time });
-        res.status(201).json(deviceMedia);
+        const existingDeviceMedia = await DeviceMedia.findOne({ where: { deviceId, mediaId } });
+        if (existingDeviceMedia) {
+            existingDeviceMedia.time = time;
+            await existingDeviceMedia.save();
+            res.status(200).json(existingDeviceMedia);
+        } else {
+            const deviceMedia = await DeviceMedia.create({ deviceId, mediaId, time });
+            res.status(201).json(deviceMedia);
+        }
+        refreshAllClients();
     } catch (error) {
         next({
             statusCode: 500,
@@ -28,6 +37,7 @@ router.delete('/', authMiddleware, adminMiddleware, async (req, res, next) => {
         }
 
         await deviceMedia.destroy();
+        refreshAllClients();
         res.status(200).json({ message: 'Mídia desvinculada do dispositivo com sucesso.' });
     } catch (error) {
         next({
