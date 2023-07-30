@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
+const http = require('http');
 
 const usersRouter = require("./routes/users");
 const logsRouter = require("./routes/logs");
@@ -15,9 +16,11 @@ const multer = require('multer');
 
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
+const createWebSocketServer = require("./routes/webSocket");
 
 const app = express();
 app.use(cors());
+const server = http.createServer(app);
 
 const options = {
   definition: {
@@ -49,7 +52,7 @@ app.use(multerMid.single('file'));
 const port = process.env.PORT;
 
 async function startServer() {
-  app.listen(port, () => {
+  server.listen(port, () => {
     console.log(`Server running at port ${port}`);
   });
 }
@@ -69,6 +72,7 @@ app.use(express.urlencoded({ extended: true, limit: "200mb" }));
 
 app.use(infoHandler);
 
+createWebSocketServer(server);
 app.use("/users", usersRouter);
 app.use("/logs", logsRouter);
 app.use("/medias", mediasRouter);
