@@ -12,9 +12,16 @@ const DeviceMedia = sequelize.define("DeviceMedias", {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+  time: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  }
 });
 
 Device.belongsToMany(Media, { through: DeviceMedia, foreignKey: 'deviceId', otherKey: 'mediaId' });
 Media.belongsToMany(Device, { through: DeviceMedia, foreignKey: 'mediaId', otherKey: 'deviceId' });
+
+DeviceMedia.belongsTo(Media, { foreignKey: 'mediaId' });
+DeviceMedia.belongsTo(Device, { foreignKey: 'deviceId' });
 
 module.exports = DeviceMedia;

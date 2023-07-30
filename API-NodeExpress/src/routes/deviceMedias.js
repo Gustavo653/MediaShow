@@ -6,8 +6,8 @@ const router = express.Router();
 
 router.post('/', authMiddleware, adminMiddleware, async (req, res, next) => {
     try {
-        const { deviceId, mediaId } = req.body;
-        const deviceMedia = await DeviceMedia.create({ deviceId, mediaId });
+        const { deviceId, mediaId, time } = req.body;
+        const deviceMedia = await DeviceMedia.create({ deviceId, mediaId, time });
         res.status(201).json(deviceMedia);
     } catch (error) {
         next({
