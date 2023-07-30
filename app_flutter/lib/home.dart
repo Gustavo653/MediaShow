@@ -95,37 +95,42 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'Status da conexão:',
-              style: TextStyle(fontSize: 18),
-            ),
-            Text(
-              _isConnected ? "Conectado" : "Desconectado",
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Última resposta do servidor:',
-              style: TextStyle(fontSize: 18),
-            ),
-            Text(
-              _lastMessage,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Última sincronização:',
-              style: TextStyle(fontSize: 18),
-            ),
-            Text(
-              _lastSyncTime,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-          ],
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Text(
+                'Status da conexão:',
+                style: TextStyle(fontSize: 18),
+              ),
+              Text(
+                _isConnected ? "Conectado" : "Desconectado",
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Última resposta do servidor:',
+                style: TextStyle(fontSize: 18),
+              ),
+              Text(
+                _lastMessage,
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Última sincronização:',
+                style: TextStyle(fontSize: 18),
+              ),
+              Text(
+                _lastSyncTime,
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
         ),
       ),
     );
