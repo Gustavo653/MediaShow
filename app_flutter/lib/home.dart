@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:video_player/video_player.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 import 'dart:convert';
 import 'dart:async';
 
@@ -25,11 +27,13 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   Timer? _timer;
   bool _isShowingImageDialog = false;
+  late VideoPlayerController _videoController;
+  late WebViewController _webViewController;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addPostFrameCallback((_) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _connectToWebSocket();
     });
   }
@@ -76,14 +80,14 @@ class _HomePageState extends State<HomePage> {
     if (_mediaList.isNotEmpty) {
       _stopSlideshow();
 
-      _showImage(_currentIndex);
+      _showMedia(_currentIndex);
 
       int currentMediaTime = _mediaList[_currentIndex]['mediaTime'] as int;
 
       _timer = Timer.periodic(Duration(seconds: currentMediaTime), (timer) {
         _currentIndex = (_currentIndex + 1) % _mediaList.length;
         currentMediaTime = _mediaList[_currentIndex]['mediaTime'] as int;
-        _showImage(_currentIndex);
+        _showMedia(_currentIndex);
         timer.cancel();
         _startSlideshow();
       });
@@ -95,26 +99,25 @@ class _HomePageState extends State<HomePage> {
     _timer = null;
   }
 
-  void _showImage(int index) {
+  void _showMedia(int index) {
     final currentMedia = _mediaList[index];
 
     if (_isShowingImageDialog) {
       Navigator.of(context).pop();
     }
 
+    String mediaName = currentMedia['mediaName'] as String;
+    String mediaTime = "Tempo: ${currentMedia['mediaTime']}s";
+    String lastSyncText = "Últ. Sinc.: $_lastSyncTime";
+    String connectionStatus = _isConnected ? "Conec." : "Descon.";
+    String appBarTitle =
+        "$mediaName - $lastSyncText - $connectionStatus - $mediaTime";
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) {
         _isShowingImageDialog = true;
-
-        String mediaName = currentMedia['mediaName'] as String;
-        String mediaTime = "Tempo: ${currentMedia['mediaTime']}s";
-        String lastSyncText = "Últ. Sinc.: $_lastSyncTime";
-        String connectionStatus = _isConnected ? "Conec." : "Descon.";
-        String appBarTitle =
-            "$mediaName - $lastSyncText - $connectionStatus - $mediaTime";
-
         return WillPopScope(
           onWillPop: () async {
             _isShowingImageDialog = false;
@@ -124,13 +127,41 @@ class _HomePageState extends State<HomePage> {
             appBar: AppBar(
               title: Text(appBarTitle),
             ),
-            body: Center(
-              child: Image.network(currentMedia['mediaUrl'] as String),
-            ),
+            body: _buildMediaContent(currentMedia),
           ),
         );
       },
     );
+  }
+
+  Widget _buildMediaContent(Map<String, dynamic> currentMedia) {
+    if (currentMedia['mediaType'] == 'video') {
+      _videoController =
+          VideoPlayerController.networkUrl(Uri.parse(currentMedia['mediaUrl']))
+            ..initialize().then((_) {
+              setState(() {});
+            });
+      return Center(
+        child: _videoController.value.isInitialized
+            ? AspectRatio(
+                aspectRatio: _videoController.value.aspectRatio,
+                child: VideoPlayer(_videoController),
+              )
+            : Container(),
+      );
+    } else if (currentMedia['mediaType'] == 'image') {
+      return Center(
+        child: Image.network(currentMedia['mediaUrl'] as String),
+      );
+    } else if (currentMedia['mediaType'] == 'web_woauth') {
+      _webViewController = WebViewController()
+        ..loadRequest(
+          Uri.parse(currentMedia['mediaUrl'] as String),
+        );
+      return WebViewWidget(controller: _webViewController);
+    } else {
+      return const Text('Tipo de mídia não suportado!');
+    }
   }
 
   Future<void> _sendSerialNumberAutomatically() async {
