@@ -136,11 +136,13 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildMediaContent(Map<String, dynamic> currentMedia) {
     if (currentMedia['mediaType'] == 'video') {
-      _videoController =
-          VideoPlayerController.networkUrl(Uri.parse(currentMedia['mediaUrl']))
-            ..initialize().then((_) {
-              setState(() {});
-            });
+      _videoController = VideoPlayerController.networkUrl(Uri.parse(currentMedia['mediaUrl']));
+      _videoController.addListener(() {
+        setState(() {});
+      });
+      _videoController.setLooping(true);
+      _videoController.initialize().then((_) => setState(() {}));
+      _videoController.play();
       return Center(
         child: _videoController.value.isInitialized
             ? AspectRatio(
