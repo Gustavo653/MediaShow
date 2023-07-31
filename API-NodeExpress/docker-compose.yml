@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   app:
-    image: workflow-back
+    image: mediashow-back
     deploy:
       replicas: 3
       resources:

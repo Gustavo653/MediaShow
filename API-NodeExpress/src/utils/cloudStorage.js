@@ -1,9 +1,9 @@
 const util = require('util');
 const { Storage } = require('@google-cloud/storage');
 
-const keyFilename = 'workflow-express-bucket.json';
+const keyFilename = 'mediashow-express-bucket.json';
 const storage = process.env.NODE_ENV == 'production' ? new Storage() : new Storage({ keyFilename });
-const bucketName = 'workflow-express-bucket';
+const bucketName = 'mediashow-express-bucket';
 const bucket = storage.bucket(bucketName);
 
 exports.uploadImage = (file, fileName) => new Promise((resolve, reject) => {

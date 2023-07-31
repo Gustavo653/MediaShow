@@ -26,10 +26,10 @@ const options = {
   definition: {
     openapi: "3.1.0",
     info: {
-      title: "WorkFlow Express API with Swagger",
+      title: "MediaShow Express API with Swagger",
       version: "1.0.0",
       description:
-        "WorkFlow Express API with Swagger",
+        "MediaShow Express API with Swagger",
     },
   },
   apis: ["src/routes/*.js"],
@@ -77,7 +77,7 @@ app.use("/users", usersRouter);
 app.use("/logs", logsRouter);
 app.use("/medias", mediasRouter);
 app.use("/devices", devicesRouter);
-app.use("/deviceMedias", deviceMediasRouter);
+app.use("/device-medias", deviceMediasRouter);
 
 app.use("*", (req, res) => {
   res.status(404).json({
