@@ -157,6 +157,7 @@ class _HomePageState extends State<HomePage> {
       );
     } else if (currentMedia['mediaType'] == 'web_woauth') {
       _webViewController = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
         ..loadRequest(
           Uri.parse(currentMedia['mediaUrl'] as String),
         );
