@@ -144,12 +144,12 @@ export class MediasComponent implements OnInit {
             this.modalDialog = false;
         } else {
             if (registry.id) {
-                this.mediaService.updateMedia(registry.id, registry.name).subscribe((x) => {
+                this.mediaService.updateMedia(registry.id, registry).subscribe((x) => {
                     this.fetchData();
                     this.modalDialog = false;
                 });
             } else {
-                this.mediaService.createMedia(registry.name).subscribe((x) => {
+                this.mediaService.createMedia(registry).subscribe((x) => {
                     this.fetchData();
                     this.modalDialog = false;
                 });

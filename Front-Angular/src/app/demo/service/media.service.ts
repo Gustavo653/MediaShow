@@ -23,22 +23,21 @@ export class MediaService {
         );
     }
 
-    createMedia(name: string): Observable<any> {
+    createMedia(media: any): Observable<any> {
         return this.getAPIURL().pipe(
             switchMap((url) => {
                 const apiUrl = `${url}/medias`;
-                const body = { name };
-                return this.http.post(apiUrl, body);
+                return this.http.post(apiUrl, media);
             })
         );
     }
 
-    updateMedia(id: string, name: string): Observable<any> {
+    updateMedia(id: string, media: any): Observable<any> {
         return this.getAPIURL().pipe(
             switchMap((url) => {
                 const apiUrl = `${url}/medias/${id}`;
                 const body = { name };
-                return this.http.put(apiUrl, body);
+                return this.http.put(apiUrl, media);
             })
         );
     }
