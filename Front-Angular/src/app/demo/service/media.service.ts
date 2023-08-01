@@ -36,7 +36,6 @@ export class MediaService {
         return this.getAPIURL().pipe(
             switchMap((url) => {
                 const apiUrl = `${url}/medias/${id}`;
-                const body = { name };
                 return this.http.put(apiUrl, media);
             })
         );
