@@ -71,8 +71,10 @@ class _HomePageState extends State<HomePage> {
       if (message == 'refresh') {
         _sendSerialNumberAutomatically();
       }
-      _mediaList = List<Map<String, dynamic>>.from(json.decode(message));
-      _startSlideshow();
+      try {
+        _mediaList = List<Map<String, dynamic>>.from(json.decode(message));
+        _startSlideshow();
+      } catch (e) {}
     });
   }
 
@@ -136,7 +138,8 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildMediaContent(Map<String, dynamic> currentMedia) {
     if (currentMedia['mediaType'] == 'video') {
-      _videoController = VideoPlayerController.networkUrl(Uri.parse(currentMedia['mediaUrl']));
+      _videoController =
+          VideoPlayerController.networkUrl(Uri.parse(currentMedia['mediaUrl']));
       _videoController.addListener(() {
         setState(() {});
       });
