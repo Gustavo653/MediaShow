@@ -38,7 +38,7 @@ export class MediasComponent implements OnInit {
         { id: 'url', type: 'text', label: 'URL', required: true },
         {
             id: 'type',
-            type: 'select',
+            type: 'listbox',
             label: 'Tipo',
             required: true,
             options: [
