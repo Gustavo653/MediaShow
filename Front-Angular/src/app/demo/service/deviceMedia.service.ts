@@ -35,8 +35,8 @@ export class DeviceMediaService {
     deleteDeviceMedia(deviceMedia: any): Observable<any> {
         return this.getAPIURL().pipe(
             switchMap((url) => {
-                const apiUrl = `${url}/device-medias`;
-                return this.http.delete(apiUrl, deviceMedia);
+                const apiUrl = `${url}/device-medias/${deviceMedia.deviceId}/${deviceMedia.mediaId}`;
+                return this.http.delete(apiUrl);
             })
         );
     }

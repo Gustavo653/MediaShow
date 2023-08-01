@@ -51,31 +51,38 @@ router.post("/", authMiddleware, adminMiddleware, async (req, res, next) => {
   }
 });
 
-router.delete("/", authMiddleware, adminMiddleware, async (req, res, next) => {
-  try {
-    const { deviceId, mediaId } = req.body;
-    const deviceMedia = await DeviceMedia.findOne({
-      where: { deviceId, mediaId },
-    });
+router.delete(
+  "/:deviceId/:mediaId",
+  authMiddleware,
+  adminMiddleware,
+  async (req, res, next) => {
+    try {
+      const { deviceId, mediaId } = req.params;
+      const deviceMedia = await DeviceMedia.findOne({
+        where: { deviceId, mediaId },
+      });
 
-    if (!deviceMedia) {
-      return res
-        .status(404)
-        .json({ message: "Relação entre mídia e dispositivo não encontrada." });
+      if (!deviceMedia) {
+        return res
+          .status(404)
+          .json({
+            message: "Relação entre mídia e dispositivo não encontrada.",
+          });
+      }
+
+      await deviceMedia.destroy();
+      refreshAllClients();
+      res
+        .status(200)
+        .json({ message: "Mídia desvinculada do dispositivo com sucesso." });
+    } catch (error) {
+      next({
+        statusCode: 500,
+        message: "Erro ao desvincular a mídia do dispositivo.",
+        detail: error,
+      });
     }
-
-    await deviceMedia.destroy();
-    refreshAllClients();
-    res
-      .status(200)
-      .json({ message: "Mídia desvinculada do dispositivo com sucesso." });
-  } catch (error) {
-    next({
-      statusCode: 500,
-      message: "Erro ao desvincular a mídia do dispositivo.",
-      detail: error,
-    });
   }
-});
+);
 
 module.exports = router;

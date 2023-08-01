@@ -30,6 +30,8 @@
                             [formControlName]="field.id"
                             [options]="field.options!"
                             [(ngModel)]="data[field.id]"
+                            [filter]="true"
+                            filterBy="name"
                             optionValue="code"
                             optionLabel="name"
                             [style]="{ width: '17rem' }"
