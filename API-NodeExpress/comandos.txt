@@ -7,6 +7,7 @@ docker run --name MySQL -e MYSQL_ROOT_PASSWORD=SenhaBraba123 -p 3306:3306 -d mys
 Build imagem docker
 sudo docker build -t mediashow-back .
 sudo docker run -p -d --name mediashow-back 4000:3000 mediashow-back
+sudo docker run -e JWT_SECRET=secret -e JWT_EXPIRATION=2h -e DATABASE_IP=10.158.0.4 -e DATABASE_TYPE=mysql -e DATABASE_USER=root -e DATABASE_SCHEMA=MediaShowAPI -e DATABASE_PASSWORD=SenhaBraba123 -p -d --name mediashow-back 3000:3000 mediashow-back
 
 Executar no docker swarm
 sudo docker swarm init
